@@ -1,0 +1,30 @@
+# Backend
+GetTicket_BE/.gradle/
+GetTicket_BE/build/
+GetTicket_BE/.idea/
+GetTicket_BE/*.iml
+GetTicket_BE/out/
+GetTicket_BE/bin/
+GetTicket_BE/.settings/
+GetTicket_BE/.classpath
+GetTicket_BE/.project
+GetTicket_BE/src/main/resources/application.yml
+GetTicket_BE/src/main/resources/application-local.yml
+GetTicket_BE/src/main/resources/application-docker.yml
+
+# Frontend
+GetTicket_FE/node_modules/
+GetTicket_FE/dist/
+GetTicket_FE/.DS_Store
+GetTicket_FE/.vscode/
+GetTicket_FE/*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+*.swp
+*.swo
+*~
