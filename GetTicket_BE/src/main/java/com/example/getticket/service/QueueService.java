@@ -45,26 +45,28 @@ public class QueueService {
 
     // Polling 을 위한 메서드
     public QueueResponseDto getQueue(String sessionId){
-        // 1. 세션 검증
         sessionService.validateSession(sessionId);
 
-        // 2. 순서 조회
+        // 1. 토큰 먼저 확인
+        String sessionTokenKey = "entry:session:" + sessionId;
+        String existingToken = redisTemplate.opsForValue().get(sessionTokenKey);
+
+        if (existingToken != null) {
+            log.info("입장 토큰 반환: sessionId={}, token={}", sessionId, existingToken);
+            return QueueResponseDto.of(0L, existingToken);
+        }
+
+        // 2. 큐에서 순서 확인
         String queueKey = "queue:" + sessionId;
         Long position = redisTemplate.opsForZSet().rank(queueKey, sessionId);
 
-        if(position == null){
+        if (position == null) {
             throw new IllegalStateException("대기열에 없습니다");
         }
 
         log.debug("순서 조회: sessionId={}, position={}", sessionId, position);
 
-        String entryToken = null;
-        if (position == 0) {
-            entryToken = generateEntryToken(sessionId);
-            log.info("입장 토큰 발급: sessionId={}, token={}", sessionId, entryToken);
-        }
-
-        return QueueResponseDto.of(position, entryToken);
+        return QueueResponseDto.of(position, null);
     }
 
     private void validateReservationStartTime(String sessionId) {

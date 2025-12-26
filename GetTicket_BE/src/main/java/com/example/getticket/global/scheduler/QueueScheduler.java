@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -14,34 +16,48 @@ import java.util.Set;
 public class QueueScheduler {
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Scheduled(fixedRate = 1000)
-    public void processQueue(){
+    @Scheduled(fixedRate = 50)  // 50ms마다 = 1초에 20명
+    public void processQueue() {
         Set<String> queueKeys = redisTemplate.keys("queue:*");
 
-        if(queueKeys == null || queueKeys.isEmpty()){
+        if (queueKeys.isEmpty()) {
             return;
         }
 
-        for(String queueKey : queueKeys){
+        for (String queueKey : queueKeys) {
             processQueueEntry(queueKey);
         }
     }
 
     private void processQueueEntry(String queueKey) {
-        // 큐 크기 확인
-        Long queueSize = redisTemplate.opsForZSet().size(queueKey);
+        // 1. 맨 앞 사람 조회
+        Set<String> topUser = redisTemplate.opsForZSet().range(queueKey, 0, 0);
 
-        if (queueSize == null || queueSize == 0) {
+        if (topUser == null || topUser.isEmpty()) {
             return;
         }
 
-        // 1초에 10명씩 입장
-        int entryCount = Math.min(20, queueSize.intValue());
+        String sessionId = topUser.iterator().next();
 
-        // 상위 N명 제거
-        redisTemplate.opsForZSet().removeRange(queueKey, 0, entryCount - 1);
+        // 2. 이미 토큰 발급했는지 확인
+        String sessionTokenKey = "entry:session:" + sessionId;
+        if (redisTemplate.hasKey(sessionTokenKey)) {
+            // 이미 처리됨, 큐에서만 제거
+            redisTemplate.opsForZSet().remove(queueKey, sessionId);
+            return;
+        }
 
-        log.debug("큐 입장 처리: queue={}, 입장={}명, 남은={}명",
-                queueKey, entryCount, queueSize - entryCount);
+        // 3. 토큰 생성
+        String token = UUID.randomUUID().toString();
+
+        // 4. Redis에 저장
+        String tokenKey = "entry:token:" + token;
+        redisTemplate.opsForValue().set(tokenKey, sessionId, 10, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(sessionTokenKey, token, 10, TimeUnit.MINUTES);
+
+        // 5. 큐에서 제거
+        redisTemplate.opsForZSet().remove(queueKey, sessionId);
+
+        log.info("입장 처리: sessionId={}, token={}", sessionId, token);
     }
 }

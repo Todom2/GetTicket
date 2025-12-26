@@ -26,6 +26,7 @@ public class SeatScheduler {
     @Scheduled(fixedRate = 10000)
     @Transactional
     public void releaseExpiredSeats() {
+        log.info("releaseExpiredSeats() 실행");
         LocalDateTime now = LocalDateTime.now();
 
         // 1. SELECTED 상태이면서 만료 시간이 지난 좌석 조회
