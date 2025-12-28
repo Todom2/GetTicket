@@ -44,6 +44,10 @@ public class ReservationService {
         LocalDateTime startTime = LocalDateTime.now().plusSeconds(30);
         log.info("예매 시작 시간: {}",startTime);
 
+        LocalDateTime now = LocalDateTime.now();
+        Long remainingSeconds = java.time.temporal.ChronoUnit.SECONDS.between(now, startTime);
+        log.info("남은 시간: {}초", remainingSeconds);
+
         // 3. 공연 생성
         Performance performance = new Performance(sessionId,startTime);
         performanceRepository.save(performance);
@@ -61,7 +65,7 @@ public class ReservationService {
         saveReservationStartTime(sessionId, startTime);
 
 
-        return ReservationResponseDto.of(startTime);
+        return ReservationResponseDto.of(startTime, remainingSeconds);
     }
 
     private List<Seat> createSeats(Performance performance) {
@@ -125,8 +129,8 @@ public class ReservationService {
         redisTemplate.opsForValue().set(
                 key,
                 startTime.toString(),
-                2,
-                TimeUnit.HOURS
+                10,
+                TimeUnit.MINUTES
         );
 
         log.info("Redis 예매 시작 시간 저장: key={}, startTime={}", key, startTime);

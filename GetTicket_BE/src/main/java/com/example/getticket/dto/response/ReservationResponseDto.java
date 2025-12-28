@@ -16,9 +16,12 @@ public class ReservationResponseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
-    public static ReservationResponseDto of(LocalDateTime startTime) {
+    private Long remainingSeconds;
+
+    public static ReservationResponseDto of(LocalDateTime startTime, Long remainingSeconds) {
         return ReservationResponseDto.builder()
                 .startTime(startTime)
+                .remainingSeconds(remainingSeconds)
                 .build();
     }
 }
