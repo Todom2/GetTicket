@@ -44,7 +44,7 @@ const pollPosition = () => {
   // 임시: 3초마다 10씩 감소
   pollingInterval = setInterval(() => {
     if (position.value > 0) {
-      position.value = Math.max(0, position.value - 10);
+      position.value = Math.max(0, position.value - 100);
       console.log("대기순서 갱신:", position.value);
 
       // 0이 되면 좌석 선택 페이지로 이동
@@ -56,7 +56,7 @@ const pollPosition = () => {
         }, 500);
       }
     }
-  }, 3000); // 3초마다 polling
+  }, 2000); // 3초마다 polling
 };
 
 onMounted(() => {
