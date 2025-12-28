@@ -3,6 +3,7 @@ import HomePage from "../pages/Homepage.vue";
 import ReservationPage from "../pages/ReservationPage.vue";
 import QueuePage from "../pages/QueuePage.vue";
 import SeatsPage from "../pages/SeatsPage.vue";
+import PaymentPage from "../pages/PaymentPage.vue";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/seats",
     name: "Seats",
     component: SeatsPage,
+  },
+  {
+    path: "/payment",
+    name: "Payment",
+    component: PaymentPage,
   },
 ];
 
